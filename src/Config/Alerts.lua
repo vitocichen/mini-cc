@@ -460,6 +460,49 @@ function M:Build(panel, options)
 	announceDefensiveSpellsChk:SetPoint("LEFT", panel, "LEFT", columnWidth, 0)
 	announceDefensiveSpellsChk:SetPoint("TOP", announceImportantSpellsChk, "TOP", 0, 0)
 
+	local ccModeLabel = mini:TextLine({
+		Parent = panel,
+		Text = L["Friendly CC"],
+	})
+	ccModeLabel:SetPoint("LEFT", panel, "LEFT", columnWidth * 2, 0)
+	ccModeLabel:SetPoint("TOP", announceImportantSpellsChk, "TOP", 0, 0)
+
+	local ccModeItems = { "Off", "Self", "All" }
+	local ccModeDropdown = mini:Dropdown({
+		Parent = panel,
+		Items = ccModeItems,
+		Width = 160,
+		GetValue = function()
+			return options.TTS and options.TTS.CC and options.TTS.CC.Mode or "Off"
+		end,
+		SetValue = function(value)
+			EnsureTtsOptions()
+			if not options.TTS.CC then
+				options.TTS.CC = { Mode = "Off" }
+			end
+			options.TTS.CC.Mode = value
+
+			if value ~= "Off" then
+				local voiceId = (options.TTS and options.TTS.VoiceID) or C_TTSSettings.GetVoiceOptionID(0)
+				local volume = options.TTS.Volume or 100
+				local speechRate = options.TTS.SpeechRate or 0
+
+				local testText = value == "Self" and L["Self Only"] or L["Self + Party"]
+				C_VoiceChat.SpeakText(voiceId, testText, speechRate, volume, true)
+			end
+			config:Apply()
+		end,
+		GetText = function(value)
+			if value == "Off" then return L["Off"]
+			elseif value == "Self" then return L["Self Only"]
+			else return L["Self + Party"]
+			end
+		end,
+	})
+	ccModeDropdown:SetPoint("LEFT", panel, "LEFT", columnWidth * 2, 0)
+	ccModeDropdown:SetPoint("TOP", ccModeLabel, "BOTTOM", 0, -2)
+	ccModeDropdown:SetWidth(160)
+
 	local volumeSlider = mini:Slider({
 		Parent = panel,
 		Min = 0,

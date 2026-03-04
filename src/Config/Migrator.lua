@@ -5,7 +5,7 @@ local mini = addon.Core.Framework
 local L = addon.L
 ---@class Db
 local dbDefaults = {
-	Version = 28,
+	Version = 29,
 	WhatsNew = {},
 	NotifiedChanges = true,
 	GlowType = "Proc Glow",
@@ -168,6 +168,9 @@ local dbDefaults = {
 				},
 				Defensive = {
 					Enabled = false,
+				},
+				CC = {
+					Mode = "Off",
 				},
 			},
 
@@ -1777,6 +1780,22 @@ function M:UpgradeToVersion28(vars)
 	end
 
 	vars.Version = 28
+	return true
+end
+
+function M:UpgradeToVersion29(vars)
+	if vars.Version ~= 28 then
+		return false
+	end
+
+	-- Add CC TTS mode option to AlertsModule
+	if vars.Modules and vars.Modules.AlertsModule and vars.Modules.AlertsModule.TTS then
+		vars.Modules.AlertsModule.TTS.CC = {
+			Mode = "Off",
+		}
+	end
+
+	vars.Version = 29
 	return true
 end
 

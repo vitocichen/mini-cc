@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>简历优化预览</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    background: #f0f0f0; 
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    padding: 40px 20px;
+  }
+  .page {
+    width: 800px;
+    margin: 0 auto 60px;
+    background: #fff;
+    padding: 50px 55px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    border-radius: 4px;
+  }
+  .label {
+    text-align: center;
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+  }
+  .label span {
+    background: #f0f0f0;
+    padding: 4px 16px;
+    border-radius: 20px;
+  }
+
+  /* 头部信息 */
+  .header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 28px;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 30px;
+  }
+  .avatar {
+    width: 90px;
+    height: 110px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 6px;
+    margin-right: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 36px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .info h1 {
+    font-size: 26px;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .info .subtitle {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 4px;
+  }
+  .info .meta {
+    font-size: 13px;
+    color: #888;
+  }
+  .info .meta span {
+    margin-right: 6px;
+  }
+
+  /* 标题栏 */
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .section-title .en {
+    font-size: 14px;
+    color: #aaa;
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  /* 优势条目 */
+  .strength-item {
+    margin-bottom: 18px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.8;
+  }
+  .strength-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    background: #667eea;
+    border-radius: 50%;
+  }
+  .strength-item .main-text {
+    font-size: 15px;
+    color: #1a1a1a;
+    font-weight: 600;
+  }
+  .strength-item .detail {
+    font-size: 13.5px;
+    color: #666;
+    margin-top: 2px;
+    padding-left: 2px;
+  }
+
+  /* 标签样式 */
+  .tag {
+    display: inline-block;
+    background: #f0f3ff;
+    color: #4a5fc1;
+    font-size: 12.5px;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 6px;
+    margin-top: 4px;
+  }
+
+  /* ===== 对比：原始版本 ===== */
+  .old .strength-item .detail {
+    color: #e60000;
+    font-weight: 400;
+  }
+  .old .strength-item::before {
+    background: #333;
+  }
+  .old .section-title::before {
+    background: #333;
+  }
+
+  .divider {
+    height: 1px;
+    background: #eee;
+    margin: 30px 0;
+  }
+
+  .compare-label {
+    text-align: center;
+    margin: 50px auto 20px;
+    position: relative;
+  }
+  .compare-label::before,
+  .compare-label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 1px;
+    background: #ddd;
+  }
+  .compare-label::before { left: 5%; }
+  .compare-label::after { right: 5%; }
+  .compare-label span {
+    background: #f0f0f0;
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #999;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== 优化后 ========== -->
+<div class="label"><span>✨ 优化后</span></div>
+<div class="page">
+  <div class="header">
+    <div class="avatar">杨</div>
+    <div class="info">
+      <h1>杨济宁</h1>
+      <div class="subtitle">求职意向：买手</div>
+      <div class="meta">
+        <span>27岁</span> | <span>本科</span> | <span>广东广州</span> | <span>5年经验</span> | <span>18988746709</span> | <span>158125760@qq.com</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">关于我 <span class="en">/ Core Strengths</span></div>
+
+  <div class="strength-item">
+    <div class="main-text">5年时尚行业经验（主美&中东市场），精通商品企划、开发、供应链管理、数据分析等搭建全链路。</div>
+    <div class="detail">↳ 月均负责上架400款；非复色爆款率25%，复色爆款率85%，转备率35%</div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text">数据驱动型思维，擅长通过数据分析洞察消费者需求与市场趋势，推动业务增长。</div>
+    <div class="detail">
+      ↳ 趋势参谋&蛛泰数据等工具 · 头部供应商增长最高达210%
+    </div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text">具备品牌从0到1搭建经验。</div>
+    <div class="detail">
+      ↳ 时尚店铺Lumivelle主理人
+      <span class="tag">店铺评分4.9</span>
+      <span class="tag">粉丝量162K</span>
+      <span class="tag">76K顾客再次回购</span>
+    </div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text">丰富的供应商及模特资源。</div>
+    <div class="detail">↳ 成衣&毛衣供应商资源，广州&杭州摄影资源库</div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text">熟悉跨境电商独立站运营逻辑与社媒投放策略。</div>
+    <div class="detail">↳ Shopify 独立站站长，拥有Snap/Facebook 投放经验</div>
+  </div>
+</div>
+
+<!-- ========== 对比分隔 ========== -->
+<div class="compare-label"><span>↕ 对比原始版本</span></div>
+
+<!-- ========== 原始版本 ========== -->
+<div class="label"><span>原始版本（红色文字）</span></div>
+<div class="page old">
+  <div class="header">
+    <div class="avatar" style="background:linear-gradient(135deg,#999,#666)">杨</div>
+    <div class="info">
+      <h1>杨济宁</h1>
+      <div class="subtitle">求职意向：买手</div>
+      <div class="meta">
+        <span>27岁</span> | <span>本科</span> | <span>广东广州</span> | <span>5年经验</span> | <span>18988746709</span> | <span>158125760@qq.com</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">ABOUT ME / 关于我</div>
+
+  <div class="strength-item">
+    <div class="main-text" style="font-weight:400;color:#333">5年时尚行业经验（主美&中东市场），精通商品企划、开发、供应链管理、数据分析等搭建全链路。<span style="color:#e60000">（月均负责上架400款；非复色爆款率25%，复色爆款率85%，转备率35%）</span></div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text" style="font-weight:400;color:#333">数据驱动型思维，擅长通过数据分析洞察消费者需求与市场趋势<span style="color:#e60000">（趋势参谋&蛛泰数据等）</span>，推动业务增长。<span style="color:#e60000">（头部供应商增长最高达210%）</span></div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text" style="font-weight:400;color:#333">具备品牌从0到1搭建经验。<span style="color:#e60000">（时尚店铺Lumivelle主理人，店铺评分4.9，粉丝量162K，76K顾客再次回购）</span></div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text" style="font-weight:400;color:#333">丰富的供应商及模特资源。<span style="color:#e60000">（成衣&毛衣供应商资源，广州&杭州摄影资源库）</span></div>
+  </div>
+
+  <div class="strength-item">
+    <div class="main-text" style="font-weight:400;color:#333">熟悉跨境电商独立站运营逻辑与社媒投放策略。<span style="color:#e60000">（Shopify 独立站站长，拥有Snap/Facebook 投放经验）</span></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -20,6 +20,10 @@ local watchers = {}
 ---@type TestSpell[]
 local testSpells = {}
 
+-- TTS: track announced CC auras to avoid repeats
+---@type table<number, boolean>
+local announcedCCAuras = {}
+
 ---@class CrowdControlModule : IModule
 local M = {}
 
@@ -30,6 +34,29 @@ addon.Modules.CrowdControlModule = M
 ---@field Watcher Watcher
 ---@field Anchor table
 ---@field Unit string
+
+local function AnnounceCCTTS(spellName, auraInstanceID, unit)
+	if not auraInstanceID or not spellName then return end
+	if announcedCCAuras[auraInstanceID] then return end
+
+	local ttsOptions = db.Modules.AlertsModule and db.Modules.AlertsModule.TTS
+	if not ttsOptions then return end
+
+	local ccMode = ttsOptions.CC and ttsOptions.CC.Mode or "Off"
+	if ccMode == "Off" then return end
+
+	-- "Self" = only announce player's own CC; "All" = player + party
+	if ccMode == "Self" and unit ~= "player" then return end
+
+	local voiceID = ttsOptions.VoiceID or C_TTSSettings.GetVoiceOptionID(0)
+	local volume = ttsOptions.Volume or 100
+	local speechRate = ttsOptions.SpeechRate or 0
+
+	announcedCCAuras[auraInstanceID] = true
+	pcall(function()
+		C_VoiceChat.SpeakText(voiceID, spellName, speechRate, volume, true)
+	end)
+end
 
 ---@param entry CrowdControlWatchEntry
 local function UpdateWatcherAuras(entry)
@@ -65,6 +92,9 @@ local function UpdateWatcherAuras(entry)
 	local slotIndex = 1
 
 	for _, aura in ipairs(ccState) do
+		-- TTS announce new CC spells
+		AnnounceCCTTS(aura.SpellName, aura.AuraInstanceID, entry.Unit)
+
 		if slotIndex > container.Count then
 			break
 		end
@@ -359,6 +389,7 @@ local function DisableWatchers()
 			entry.Container.Frame:Hide()
 		end
 	end
+	wipe(announcedCCAuras)
 end
 
 local function EnableWatchers()
