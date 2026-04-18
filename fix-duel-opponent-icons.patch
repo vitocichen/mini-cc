@@ -1,0 +1,114 @@
+From: vitocichen
+Subject: [PATCH] Fix friendly duel opponent CC/Important icons never showing
+
+Root cause
+----------
+When a friendly player becomes your duel opponent, the WoW API still
+reports them as friendly: UnitIsFriend("player", unit) stays true and
+UnitIsEnemy("player", unit) stays false (same faction, not hostile by
+reputation). So GetUnitOptions() keeps returning nmModule.Friendly for
+the duel opponent.
+
+For users who only enable Enemy.CC / Enemy.Important (a common PvP
+setup), Friendly.* are all disabled. That causes two problems:
+
+1. EnsureContainersForNameplate() in OnNamePlateAdded() creates no
+   containers (all Friendly.*.Enabled = false).
+
+2. Because of the `if not ccContainer and not importantContainer and
+   not combinedContainer then return end` early-return, the function
+   bails out WITHOUT populating `nameplateAnchors[unit]` or
+   `watchers[unit]`. No UnitAuraWatcher is registered for this unit.
+
+When the duel then starts, GetUnitOptions() for the SAME unit token
+now returns nmModule.Enemy (because the opponent is attackable /
+hostile to player and the Enemy path is chosen). But there is no
+watcher listening to UNIT_AURA and no entry in `nameplateAnchors`, so
+OnAuraDataChanged() never fires and Enemy.CC / Enemy.Important icons
+never appear. Manually toggling Enemy.* Enabled off/on forces
+M:Refresh() -> HaveModesChanged()=true -> RebuildContainers(), which
+creates the containers and fixes it — which is why the workaround was
+"toggle the checkbox once".
+
+Fix
+---
+Two small changes in Modules/NameplatesModule.lua:
+
+1. In OnNamePlateAdded(), also keep data+watcher alive when the
+   OPPOSITE faction has any mode enabled. This way a watcher is
+   already listening when the unit later becomes a duel opponent.
+
+2. In OnAuraDataChanged(), self-heal: if the currently active
+   unitOptions has an Enabled mode but the corresponding cached
+   container in `data` is nil, call EnsureContainersForNameplate()
+   inline to materialize it before dispatching to ApplyCcToNameplate
+   / ApplyImportantSpellsToNameplate.
+
+No changes to GetUnitOptions() and no new event registrations are
+needed — the existing UNIT_AURA stream drives the self-heal path
+automatically when the duel opponent gains their first aura.
+
+---
+ Modules/NameplatesModule.lua | 40 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 38 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/NameplatesModule.lua b/Modules/NameplatesModule.lua
+--- a/Modules/NameplatesModule.lua
++++ b/Modules/NameplatesModule.lua
+@@ -480,6 +480,32 @@ local function OnAuraDataChanged(unitToken)
+ 	-- Fetch once and pass down to avoid each Apply function re-traversing the db path
+ 	local unitOptions = M:GetUnitOptions(unitToken)
+ 
++	-- BUGFIX (duels): If GetUnitOptions() switches between Friendly and Enemy for the
++	-- same unitToken (e.g. duel starts), the cached container references may be nil
++	-- for the now-active options. Rebuild lazily so aura data isn't silently dropped.
++	local needRebuild = false
++	if unitOptions.Combined and unitOptions.Combined.Enabled then
++		if not data.CombinedContainer then needRebuild = true end
++	else
++		if unitOptions.CC and unitOptions.CC.Enabled and not data.CcContainer then
++			needRebuild = true
++		end
++		if unitOptions.Important and unitOptions.Important.Enabled and not data.ImportantContainer then
++			needRebuild = true
++		end
++	end
++
++	if needRebuild then
++		local nameplate = data.Nameplate or C_NamePlate.GetNamePlateForUnit(unitToken)
++		if nameplate then
++			local ccContainer, importantContainer, combinedContainer =
++				EnsureContainersForNameplate(nameplate, unitToken, unitOptions)
++			data.CcContainer = ccContainer
++			data.ImportantContainer = importantContainer
++			data.CombinedContainer = combinedContainer
++		end
++	end
++
+ 	if unitOptions.Combined.Enabled then
+ 		ApplyCombinedToNameplate(data, watcher, unitOptions)
+ 	else
+@@ -720,7 +746,21 @@ local function OnNamePlateAdded(unitToken)
+ 	local ccContainer, importantContainer, combinedContainer =
+ 		EnsureContainersForNameplate(nameplate, unitToken, unitOptions)
+ 
+-	if not ccContainer and not importantContainer and not combinedContainer then
++	-- BUGFIX (duels): Previously this returned early if no containers were created for
++	-- the current options table (e.g. friendly player with Friendly.* all disabled).
++	-- That meant `nameplateAnchors[unitToken]` and `watchers[unitToken]` were never
++	-- populated, so when the unit later became a duel opponent and GetUnitOptions()
++	-- started returning Enemy options, there was no watcher listening to UNIT_AURA and
++	-- OnAuraDataChanged would never fire to rebuild containers.
++	-- We now also create data+watcher if the *opposite* faction has any mode enabled,
++	-- so a future duel-start can materialize the Enemy containers on-demand via the
++	-- self-heal path in OnAuraDataChanged.
++	local oppositeOptions = units:IsEnemy(unitToken) and nmModule.Friendly or nmModule.Enemy
++	local anyEnabledOpposite = (oppositeOptions.Combined and oppositeOptions.Combined.Enabled)
++		or (oppositeOptions.CC and oppositeOptions.CC.Enabled)
++		or (oppositeOptions.Important and oppositeOptions.Important.Enabled)
++
++	if not ccContainer and not importantContainer and not combinedContainer and not anyEnabledOpposite then
+ 		return
+ 	end
+ 
+-- 
